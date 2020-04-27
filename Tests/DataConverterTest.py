@@ -1,15 +1,14 @@
-import unittest
-import numpy as np
 import logging.config
-from Config import log_config
+import unittest
+
 import DataConverter
 import DataObjects.Bar as Bar
+from Config import log_config
 
 logging.config.dictConfig(log_config.TEST_CONFIG)
 
 
 class TestMethods(unittest.TestCase):
-
 
     def test_merge_lists(self):
         # Given
@@ -54,8 +53,6 @@ class TestMethods(unittest.TestCase):
 
         self.assertEqual(len(expected_merged_list), len(merged_list))
         for index in range(len(expected_merged_list)):
-            # print(expected_merged_list[index].time_stamp)
-
             self.assertEqual(expected_merged_list[index].time_stamp, merged_list[index].time_stamp)
 
         self.assertEqual(len(expected_api_list_short), len(api_list_short))
@@ -101,8 +98,6 @@ class TestMethods(unittest.TestCase):
 
         self.assertEqual(len(expected_merged_list), len(merged_list))
         for index in range(len(expected_merged_list)):
-            # print(expected_merged_list[index].time_stamp)
-
             self.assertEqual(expected_merged_list[index].time_stamp, merged_list[index].time_stamp)
 
         self.assertEqual(len(expected_api_list_short), len(api_list_short))
@@ -187,8 +182,6 @@ class TestMethods(unittest.TestCase):
 
         self.assertEqual(len(expected_merged_list), len(merged_list))
         for index in range(len(expected_merged_list)):
-            # print(expected_merged_list[index].time_stamp)
-
             self.assertEqual(expected_merged_list[index].time_stamp, merged_list[index].time_stamp)
 
         self.assertEqual(len(expected_api_list_short), len(api_list_short))

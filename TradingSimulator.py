@@ -1,8 +1,9 @@
 import logging as log
-from Constants import Actions
+
 import numpy as np
 
-# KLIWR5Z434P010JV
+from Constants import Actions
+
 
 def simulate_trading(predictions, test_prices, division_factor, ratio_per_trade, commission_rate):
     log.info("Starting trading simulation")
@@ -38,6 +39,7 @@ def simulate_trading(predictions, test_prices, division_factor, ratio_per_trade,
     log.info("Simulation result = %s ", simulation_result)
 
     return simulation_result
+
 
 def simulate_trading_locally(predictions, bars_list, starting_balance, ratio_per_trade, commission_rate):
     log.info("Starting trading simulation, number of predictions: %s", len(predictions))

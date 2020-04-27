@@ -1,10 +1,13 @@
-import mysql.connector
 import configparser
 import logging as log
-import Database.SqlStatements as SqlStatements
+
+import mysql.connector
 import numpy as np
 
+import Database.SqlStatements as SqlStatements
+
 db = None
+
 
 def setup_database_connection():
     log.info("Setting up database connection")
@@ -44,12 +47,14 @@ def insert_bar(bar):
 
     db.commit()
 
+
 def insert_bars(bars):
     if db is None:
         log.warning("Database connection not setup. Calling setup_database_connection() to initiate connection")
         setup_database_connection()
 
     log.info("Inserting list of bars to database")
+    log.debug("List of bars inserted: %s", bars)
 
     cursor = db.cursor()
     for bar in bars:
@@ -88,20 +93,3 @@ def fetch_all_bars(symbol, time_frame):
         log.warning("Empty resultset retrieved from database!")
 
     return result
-
-
-
-
-
-
-
-# def insert_bars(nparray_bars):
-#     if db is None:
-#         log.warning("Database connection not setup. Calling setup_database_connection() to initiate connection")
-#         setup_database_connection()
-#
-#     log.info("Inserting 1d array of bars to database")
-#     cursor = db.cursor()
-#     sql = SqlStatements.INSERT_BAR
-#     cursor.executemany(sql, nparray_bars.tolist())
-#     db.commit()

@@ -1,10 +1,12 @@
-import unittest
 import logging.config
+import unittest
+
 from Config import log_config
 from DataObjects import Bar
-from Database import DatabaseConnector, SqlStatements
+from Database import DatabaseConnector
 
 logging.config.dictConfig(log_config.TEST_CONFIG)
+
 
 class TestMethods(unittest.TestCase):
 

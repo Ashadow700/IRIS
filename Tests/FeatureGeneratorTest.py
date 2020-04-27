@@ -1,8 +1,10 @@
-import unittest
-import numpy as np
 import logging.config
+import unittest
+
+import numpy as np
+
+import FeaturesGenerator
 from Config import log_config
-import FeatureLabelGenerator
 from DataObjects import Bar
 
 logging.config.dictConfig(log_config.TEST_CONFIG)
@@ -22,7 +24,7 @@ class TestMethods(unittest.TestCase):
         ]
 
         # When
-        features = FeatureLabelGenerator.generate_features(price_data, 3)
+        features = FeaturesGenerator.generate_features(price_data, 3)
 
         print("features = ", features)
 
@@ -65,7 +67,6 @@ class TestMethods(unittest.TestCase):
                  [6.5, 6, 5.1],
                  [1.0555, 3, 4.4444]]
         ])
-
         # Then
         np.testing.assert_array_equal(expected_features, features)
 
@@ -81,4 +82,4 @@ class TestMethods(unittest.TestCase):
         ]
 
         # When
-        labels = FeatureLabelGenerator.generate_labels(price_data)
+        labels = FeaturesGenerator.generate_labels(price_data)
