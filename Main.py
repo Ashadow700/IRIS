@@ -1,25 +1,29 @@
-import DataConverter
-from Constants import Symbols, TimeFrames, Misc
+import configparser
 import logging as log
 import logging.config
-from Config import log_config
-import TradingSimulator
-import ModelBuilder
-from Database import DatabaseConnector as database
+import sys
+import time
+
 import ApiConnector
+import DataConverter
+import DataPlotter
 import FeaturesGenerator
 import LabelsGenerator
-import DataPlotter
-import time
-from DataObjects import Bar
+import ModelBuilder
+import TradingSimulator
+from Config import log_config
+from Constants import Symbols, TimeFrames, Misc
+from Database import DatabaseConnector as database
 
 logging.config.dictConfig(log_config.DEFAULT_CONFIG)
+config = configparser.ConfigParser()
+config.read("Config/Config.ini")
 
 
 def main():
 
-    symbol = Symbols.MSFT
-    time_frame = TimeFrames.ONE_MIN
+    symbol = config.get('Simulation', 'symbol')
+    time_frame = int(config.get('Simulation', 'time_frame'))
 
     database.setup_database_connection()
     result_set = database.fetch_all_bars(symbol, time_frame)
@@ -32,17 +36,21 @@ def main():
 
     database.insert_bars(api_list_short)
 
-    number_previous_bars = 300
-    division_factor = 100
-    test_factor = 0.2
-    trigger_value = 0.005
-    price_range_factor = 0.8
-    index_range_factor = 0.8
+    features = FeaturesGenerator.generate_features(
+        bars_list=merged_list,
+        nbr_of_previous_bars=int(config.get('FeaturesGeneration', 'nbr_of_previous_bars')),
+        price_division_factor=int(config.get('FeaturesGeneration', 'price_division_factor')),
+        volume_division_factor=int(config.get('FeaturesGeneration', 'volume_division_factor'))
+    )
 
-    features = FeaturesGenerator.generate_features(merged_list, number_previous_bars)
-    labels = LabelsGenerator.generate_labels(merged_list, trigger_value, price_range_factor, index_range_factor)
+    labels = LabelsGenerator.generate_labels(
+        bars_list=merged_list,
+        trigger_value=float(config.get('LabelsGeneration', 'trigger_value')),
+        price_range_factor=float(config.get('LabelsGeneration', 'price_range_factor')),
+        index_range_factor=float(config.get('LabelsGeneration', 'index_range_factor'))
+    )
 
-    nbr_of_simulations = 1
+    nbr_of_simulations = int(config.get('Simulation', 'nbr_of_simulations'))
     build_and_simulate(features, labels, merged_list, nbr_of_simulations)
 
     DataPlotter.plot(merged_list, labels)
@@ -57,17 +65,18 @@ def build_and_simulate(features, labels, merged_list, nbr_of_simulations):
         train_factor = 0.2
         model, predictions, test_bars = ModelBuilder.build_model(features, labels, train_factor, merged_list)
 
-        starting_balance = 50000
-        ratio_per_trade = 50 * 0.01  # Allowed to invest % of account
-        commission_rate = 0.1 * 0.01  # Commission rate in %
+        starting_balance = float(config.get('Simulation', 'starting_balance'))
+        ratio_per_trade = float(config.get('Simulation', 'ratio_per_trade'))
+        commission_rate = float(config.get('Simulation', 'commission_rate'))
+
         simulation_result = TradingSimulator.simulate_trading_locally(
             predictions=predictions,
             bars_list=test_bars,
             starting_balance=starting_balance,
             ratio_per_trade=ratio_per_trade,
             commission_rate=commission_rate
-
         )
+
         simulation_results.append(simulation_result)
         final_simulation_result = final_simulation_result + simulation_result
         log.info("Final simulation result thus far = %s ", final_simulation_result / (index+1))
@@ -100,16 +109,19 @@ def data_harvest():
         time.sleep(Misc.ONE_DAY)
 
 def test():
-    database.setup_database_connection()
-    bar = Bar.Bar('GOOG', '15', '2020-04-10 14:34:59', 5.324234, 7.23, 7.23, 8.2223, 1337)
-    bar1 = Bar.Bar('GOOG', '15', '2020-04-10 14:34:59', 5.324234, 6.34, 7.23, 8.2223, 1337)
-    bar3 = Bar.Bar('GOOG', '15', '2020-04-10 14:34:59', 5.324234, 6.34, 7.23, 8.2223, 1337)
-    bar4 = Bar.Bar('GOOG', '10', '2020-04-10 14:34:59', 5.324234, 6.34, 7.23, 8.2223, 1337)
+    print('Argument List:', sys.argv)
 
-    bars = [bar, bar1, bar3, bar4]
-    database.insert_bars(bars)
+    starting_balance = config.get('Simulation', 'starting_balance')
+    print(starting_balance)
+
+    ratio_per_trade = config.get('Simulation', 'ratio_per_trade')
+    print(ratio_per_trade)
+    commission_rate = config.get('Simulation', 'commission_rate')
+    print(commission_rate)
+    print(type(commission_rate))
 
 
 if __name__ == "__main__":
-    main()
+    # main()
     data_harvest()
+    # test()
